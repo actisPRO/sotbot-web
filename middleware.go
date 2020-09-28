@@ -10,7 +10,7 @@ import (
 
 var noAuthPages = []string {
 	"login",
-	"public",
+	"static",
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
