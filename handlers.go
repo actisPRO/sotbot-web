@@ -25,6 +25,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	//session, _ := store.Get(r, "sotweb")
 	errorTmpl := template.Must(template.ParseFiles("views/error.html"))
 	loginTmpl := template.Must(template.ParseFiles("views/login.html"))
+	redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
+
+	session, _ := store.Get(r, "sotweb")
+	if session.Values["auth"] == true {
+		err := redirectTmpl.Execute(w, lib.RedirectData{RedirectURL: "/"})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+	}
 
 	// we accept only GET requests
 	if r.Method != "GET" {
@@ -166,7 +175,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["auth"] = true
 		_ = session.Save(r, w)
 
-		redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
 		err = redirectTmpl.Execute(w, lib.RedirectData{RedirectURL: "/"})
 		if err != nil {
 			http.Error(w, err.Error(), 500)
