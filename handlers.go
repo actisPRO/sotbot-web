@@ -78,11 +78,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		var res map[string] interface {}
 		err = json.NewDecoder(resp.Body).Decode(&res)
-		if err != nil {
+		if err != nil  {
 			err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при парсинге JSON. " + err.Error()})
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
+		}
+		if res["error"] != nil {
+			err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при запросе токена."})
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+			}
+			return
 		}
 
 		session, _ := store.Get(r, "sotweb")
