@@ -12,3 +12,7 @@ type ErrorData struct {
 type RedirectData struct {
 	RedirectURL	string
 }
+
+type IndexData struct {
+
+}

@@ -13,7 +13,12 @@ import (
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "OK")
+	indexTmpl := template.Must(template.ParseFiles("views/index.html"))
+
+	err := indexTmpl.Execute(w, lib.IndexData{})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
