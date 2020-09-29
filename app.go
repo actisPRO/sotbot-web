@@ -57,6 +57,7 @@ func main() {
 	r.HandleFunc("/", IndexHandler)
 	r.HandleFunc("/login", LoginHandler)
 	r.HandleFunc("/xbox", XboxHandler)
+	r.HandleFunc("/logout", LogoutHandler)
 
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.PathPrefix("/static/").Handler(s)

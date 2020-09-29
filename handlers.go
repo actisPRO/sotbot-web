@@ -251,3 +251,15 @@ func XboxHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 }
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "sotweb")
+	session.Values["auth"] = false
+	_ = session.Save(r, w)
+
+	redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
+	err := redirectTmpl.Execute(w, lib.RedirectData{RedirectURL: "/login"})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+}
