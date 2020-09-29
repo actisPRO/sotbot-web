@@ -8,8 +8,8 @@ import (
 )
 
 func GetIP(r *http.Request) (string, error) {
-	//Get IP from the X-REAL-IP header
-	ip := r.Header.Get("X-REAL-IP")
+	//Get IP from CF-CONNECTING-IP (because we are using Cloudflare)
+	ip := r.Header.Get("CF-CONNECTING-IP")
 	netIP := net.ParseIP(ip)
 	if netIP != nil {
 		return ip, nil
