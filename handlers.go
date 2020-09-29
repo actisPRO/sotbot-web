@@ -15,8 +15,23 @@ import (
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	indexTmpl := template.Must(template.ParseFiles("views/index.html"))
+	errorTmpl := template.Must(template.ParseFiles("views/error.html"))
 
-	err := indexTmpl.Execute(w, lib.IndexData{})
+	session, _ := store.Get(r, "sotweb")
+	user, err := lib.GetUserDataFromDB(db, session.Values["userid"].(string))
+	if err != nil {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+
+		return
+	}
+
+	err = indexTmpl.Execute(w, lib.IndexData{
+		Username: user.Username,
+		Xbox: user.Xbox,
+	})
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
@@ -179,6 +194,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		session.Values["auth"] = true
+		session.Values["userid"] = dUser.ID
 		_ = session.Save(r, w)
 
 		err = redirectTmpl.Execute(w, lib.RedirectData{RedirectURL: "/"})
@@ -194,13 +210,13 @@ func XboxHandler(w http.ResponseWriter, r *http.Request) {
 	redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
 
 	session, _ := store.Get(r, "sotweb")
-	var token string
-	err := db.QueryRow(fmt.Sprintf("SELECT access_token FROM sessions WHERE id = '%s'", session.ID)).Scan(&token)
+	token, err := lib.GetTokenFromSession(db, session)
 	if err != nil {
 		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 		}
+
 		return
 	}
 

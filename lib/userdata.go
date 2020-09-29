@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/gorilla/sessions"
 	"time"
 )
 
@@ -66,4 +67,14 @@ func GetUserDataFromDB(db *sql.DB, userid string) (UserData, error) {
 	}
 
 	return data, nil
+}
+
+func GetTokenFromSession(db *sql.DB, session *sessions.Session) (string, error){
+	var token string
+	err := db.QueryRow(fmt.Sprintf("SELECT access_token FROM sessions WHERE id = '%s'", session.ID)).Scan(&token)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }

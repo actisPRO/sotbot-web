@@ -14,5 +14,6 @@ type RedirectData struct {
 }
 
 type IndexData struct {
-
+	Username	string
+	Xbox		string
 }

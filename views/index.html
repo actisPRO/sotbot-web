@@ -33,8 +33,14 @@
     <main role="main" class="inner cover page-hero_snippet container align-center content-block">
         <div class="page-header">
             <div>
-                <h2>Добро пожаловать!</h2>
-                <p>Твой аккаунт зарегистрирован и теперь ты можешь пользоваться всеми функциями сообщества!</p>
+                <h2>Привет, {{ .Username}}!</h2>
+                {{if eq .Xbox ""}}
+                    <p><strong>Xbox:</strong> не привязан, <strong><a href="/xbox">привяжи его</a></strong> для доступа к рейдам</p>
+                {{else}}
+                    <p><strong>Xbox:</strong> {{ .Xbox}}</p>
+                {{end}}
+
+                <a class="link button" href="/logout">Выйти</a>
             </div>
         </div>
     </main>
