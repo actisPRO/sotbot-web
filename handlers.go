@@ -187,3 +187,51 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+// Привязка Xbox (доступна, если при регистрации не был привязан Xbox)
+func XboxHandler(w http.ResponseWriter, r *http.Request) {
+	errorTmpl := template.Must(template.ParseFiles("views/error.html"))
+	redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
+
+	session, _ := store.Get(r, "sotweb")
+	var token string
+	err := db.QueryRow(fmt.Sprintf("SELECT access_token FROM sessions WHERE id = '%s'", session.ID)).Scan(&token)
+	if err != nil {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+		return
+	}
+
+	user, err := lib.GetUserDataFromDiscord(token)
+	if err != nil {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при получении ваших данных. " + err.Error()})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+		return
+	}
+
+	if user.Xbox == "" {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "К твоему Discord-аккаунту не привязан Xbox. Пожалуйста, привяжи его и повтори попытку."})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+		return
+	}
+
+	_, err = db.Exec(fmt.Sprintf("UPDATE users SET xbox='%s' WHERE userid='%s'", user.Xbox, user.UserID))
+	if err != nil {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+		return
+	}
+
+	err = redirectTmpl.Execute(w, lib.RedirectData{RedirectURL: "/"})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+}
