@@ -8,3 +8,4 @@ conf.json
 views/basic-login.html
 static/favicon.ico
 static/css/sot.css
+*.log

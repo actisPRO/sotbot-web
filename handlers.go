@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/logger"
 	"github.com/gorilla/sessions"
 	"html/template"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -125,7 +125,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		refreshToken := res["refresh_token"].(string)
 		expiresIn := res["expires_in"].(float64)
 
-		log.Println(expiresIn)
+		logger.Info(expiresIn)
 
 		expiration := time.Now().Add(time.Second * time.Duration(expiresIn)).Format("2006-01-02 15:04:05")
 
