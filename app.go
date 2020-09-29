@@ -13,10 +13,10 @@ import (
 )
 
 var (
-	config	lib.Configuration
-	discord	*discordgo.Session
-	db		*sql.DB
-	store	*mysqlstore.MySQLStore
+	config  lib.Configuration
+	discord *discordgo.Session
+	db      *sql.DB
+	store   *mysqlstore.MySQLStore
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	}
 	log.Println("Successfully loaded configuration")
 
-	store, err = mysqlstore.NewMySQLStore(fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true&loc=Local", config.DBUser, config.DBPassword, config.DBHost, config.DBName), "sessions", "/",604800, []byte(config.AuthKey))
+	store, err = mysqlstore.NewMySQLStore(fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true&loc=Local", config.DBUser, config.DBPassword, config.DBHost, config.DBName), "sessions", "/", 604800, []byte(config.AuthKey))
 	if err != nil {
 		panic(err)
 	}
@@ -67,7 +67,7 @@ func main() {
 
 	http.Handle("/", r)
 	log.Println("HTTP server is listening")
-	err = http.ListenAndServe(":80", nil)
+	err = http.ListenAndServe(":9900", nil)
 	if err != nil {
 		panic(err)
 	}
