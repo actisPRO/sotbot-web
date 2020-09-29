@@ -7,6 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/gorilla/sessions"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -107,6 +108,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		accessToken := res["access_token"].(string)
 		refreshToken := res["refresh_token"].(string)
+		expiresIn := res["expires_in"].(float64)
+
+		log.Println(expiresIn)
+
+		expiration := time.Now().Add(time.Second * time.Duration(expiresIn)).Format("2006-01-02 15:04:05")
 
 		_, err = db.Exec(fmt.Sprintf("UPDATE sessions SET access_token = '%s', refresh_token = '%s' WHERE id = '%s'", accessToken, refreshToken, session.ID))
 		if err != nil {
@@ -160,7 +166,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if dbData.UserID == "" { // не зарегистрирован
-			_, err = db.Exec(fmt.Sprintf("INSERT INTO users(userid, registered_on, last_login, username, avatarurl, xbox, ip) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')", dUser.ID, regDate, regDate, dUser.String(), dUser.AvatarURL(""), xboxConnection, ip))
+			_, err = db.Exec(fmt.Sprintf("INSERT INTO users(userid, registered_on, last_login, username, avatarurl, xbox, ip, access_token, refresh_token, access_token_expiration) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", dUser.ID, regDate, regDate, dUser.String(), dUser.AvatarURL(""), xboxConnection, ip, accessToken, refreshToken, expiration))
 			if err != nil {
 				err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
 				if err != nil {
@@ -169,7 +175,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			_, _ = db.Exec(fmt.Sprintf("UPDATE users SET ip = '%s', last_login = '%s' WHERE userid = '%s'", ip, regDate, dUser.ID))
+			_, _ = db.Exec(fmt.Sprintf("UPDATE users SET ip = '%s', last_login = '%s', access_token = '%s', refresh_token = '%s', access_token_expiration = '%s' WHERE userid = '%s'", ip, regDate, accessToken, refreshToken, expiration, dUser.ID))
 		}
 
 		session.Values["auth"] = true

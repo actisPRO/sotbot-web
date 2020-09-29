@@ -8,13 +8,16 @@ import (
 )
 
 type UserData struct {
-	UserID			string
-	RegisteredOn	time.Time
-	LastLogin		time.Time
-	Username		string
-	AvatarURL		string
-	Xbox			string
-	IP				string
+	UserID					string
+	RegisteredOn			time.Time
+	LastLogin				time.Time
+	Username				string
+	AvatarURL				string
+	Xbox					string
+	IP						string
+	AccessToken				string
+	RefreshToken			string
+	AccessTokenExpiration	time.Time
 }
 
 func GetUserDataFromDiscord(token string) (UserData, error) {
@@ -54,7 +57,7 @@ func GetUserDataFromDiscord(token string) (UserData, error) {
 
 func GetUserDataFromDB(db *sql.DB, userid string) (UserData, error) {
 	data := UserData{}
-	err := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE userid = '%s'", userid)).Scan(&data.UserID, &data.RegisteredOn, &data.LastLogin, &data.Username, &data.AvatarURL, &data.Xbox, &data.IP)
+	err := db.QueryRow(fmt.Sprintf("SELECT * FROM users WHERE userid = '%s'", userid)).Scan(&data.UserID, &data.RegisteredOn, &data.LastLogin, &data.Username, &data.AvatarURL, &data.Xbox, &data.IP, &data.AccessToken, &data.RefreshToken, &data.AccessTokenExpiration)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return UserData{}, nil
