@@ -1,0 +1,1 @@
+All the files are standalone apps and must be compiled and ran separately.
