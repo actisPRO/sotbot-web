@@ -285,7 +285,8 @@ func BotControlPanelHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		status := "произошла ошибка при запросе статуса"
-		out, err := exec.Command("systemctl is-active sotbot").Output()
+		out, err := exec.Command("systemctl", "is-active", "sotbot").Output()
+
 		if err == nil {
 			status = string(out[:])
 		}
@@ -304,14 +305,14 @@ func BotControlPanelHandler(w http.ResponseWriter, r *http.Request) {
 			status := "произошла ошибка при обновлении статуса"
 			switch r.PostFormValue("action") {
 			case "start":
-				_ = exec.Command("sudo systemctl start sotbot")
+				_ = exec.Command("sudo", "systemctl", "start", "sotbot")
 			case "restart":
-				_ = exec.Command("sudo systemctl restart sotbot")
+				_ = exec.Command("sudo", "systemctl", "restart", "sotbot")
 			case "stop":
-				_ = exec.Command("sudo systemctl stop sotbot")
+				_ = exec.Command("sudo", "systemctl", "stop", "sotbot")
 			}
 
-			out, err := exec.Command("systemctl is-active sotbot").Output()
+			out, err := exec.Command("systemctl", "is-active", "sotbot").Output()
 			if err == nil {
 				status = string(out[:])
 			}
