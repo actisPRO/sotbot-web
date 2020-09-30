@@ -68,6 +68,7 @@ func main() {
 	r.HandleFunc("/login", LoginHandler)
 	r.HandleFunc("/xbox", XboxHandler)
 	r.HandleFunc("/logout", LogoutHandler)
+	r.HandleFunc("/botcp", BotControlPanelHandler)
 
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	r.PathPrefix("/static/").Handler(s)

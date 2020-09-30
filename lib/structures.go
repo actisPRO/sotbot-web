@@ -18,3 +18,7 @@ type IndexData struct {
 	AccessLevel int
 	Xbox        string
 }
+
+type BotCPData struct {
+	Status		string
+}

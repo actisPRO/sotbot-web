@@ -2,6 +2,7 @@ package main
 
 import (
 	"./lib"
+	"fmt"
 	"github.com/google/logger"
 	"html/template"
 	"net/http"
@@ -19,7 +20,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			ip = "unknown"
 		}
-		logger.Info("Request to " + r.RequestURI + " from " + ip)
+		logger.Info(fmt.Sprintf("Request to %s (method %s) from %s", r.RequestURI, r.Method, ip))
 		next.ServeHTTP(w, r)
 	})
 }

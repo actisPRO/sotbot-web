@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"os/exec"
 	"time"
 )
 
@@ -253,6 +254,70 @@ func XboxHandler(w http.ResponseWriter, r *http.Request) {
 	err = redirectTmpl.Execute(w, lib.RedirectData{RedirectURL: "/"})
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+	}
+}
+
+func BotControlPanelHandler(w http.ResponseWriter, r *http.Request) {
+	errorTmpl := template.Must(template.ParseFiles("views/error.html"))
+	botcpTmpl := template.Must(template.ParseFiles("views/botcp.html"))
+
+	session, _ := store.Get(r, "sotweb")
+	user, err := lib.GetUserDataFromDB(db, session.Values["userid"].(string))
+	if err != nil {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+
+		return
+	}
+	member, _ := discord.GuildMember(config.Guild, user.UserID)
+	accessLevel := lib.GetAccessLevelFromRoles(member, config)
+
+	if accessLevel < lib.Admin {
+		err := errorTmpl.Execute(w, lib.ErrorData{Message: "У вас недостаточно прав для просмотра данной страницы"})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+
+		return
+	}
+
+	if r.Method == "GET" {
+		status := "произошла ошибка при запросе статуса"
+		out, err := exec.Command("systemctl is-active sotbot").Output()
+		if err == nil {
+			status = string(out[:])
+		}
+
+		err = botcpTmpl.Execute(w, lib.BotCPData{Status: status})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+	} else if r.Method == "POST" {
+		_ = r.ParseForm()
+		if r.PostFormValue("action") == "" {
+			_, _ = fmt.Fprint(w, "{ \"error\": \"no action specified\" }")
+			return
+		} else {
+			status := "произошла ошибка при обновлении статуса"
+			switch r.PostFormValue("action") {
+			case "start":
+				_ = exec.Command("sudo systemctl start sotbot")
+			case "restart":
+				_ = exec.Command("sudo systemctl restart sotbot")
+			case "stop":
+				_ = exec.Command("sudo systemctl stop sotbot")
+			}
+
+			out, err := exec.Command("systemctl is-active sotbot").Output()
+			if err == nil {
+				status = string(out[:])
+			}
+			_, _ = fmt.Fprintf(w, "{ \"status\": \"%s\" }", status)
+			return
+		}
 	}
 }
 

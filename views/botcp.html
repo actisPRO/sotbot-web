@@ -24,7 +24,7 @@
         <div class="inner">
             <h3 class="masthead-brand">Sea of Thieves RU</h3>
             <nav class="nav nav-masthead justify-content-center">
-                <a class="nav-link active" href="/">Home</a>
+                <a class="nav-link" href="/">Home</a>
                 <a class="nav-link" href="https://discord.gg/sotru">Discord Server</a>
             </nav>
         </div>
@@ -33,20 +33,13 @@
     <main role="main" class="inner cover page-hero_snippet container align-center content-block">
         <div class="page-header">
             <div>
-                <h2>Привет, {{ .Username}}!</h2>
-                {{if eq .Xbox ""}}
-                    <p><strong>Xbox:</strong> не привязан, <strong><a href="/xbox">привяжи его</a></strong> для доступа к рейдам</p>
-                {{else}}
-                    <p><strong>Xbox:</strong> {{ .Xbox}}</p>
-                {{end}}
-
-                {{if ge .AccessLevel 3}}
-                <a class="link button" href="/botcp">Управление ботом</a>
-                {{end}}
+                <h2>Управлене ботом</h2>
+                <p>Статус: <span id="status">{{ .Status}}</span> <strong><a id="refresh" href="#">(обновить)</a></strong></p>
+                <a class="link button" id="start" href="#">Старт</a>
+                <a class="link button" id="restart" href="#">Рестарт</a>
+                <a class="link button" id="stop" href="#">Стоп</a>
             </div>
-            <div>
-                <a class="link button" href="/logout">Выйти</a>
-            </div>
+            <div><a class="link button" href="/">На главную</a></div>
         </div>
     </main>
 
@@ -57,12 +50,31 @@
     </footer>
 </div>
 
-
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="../static/js/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function() {
+        $('#refresh').click(() => { sendRequest('refresh'); return false; });
+        $('#start').click(() => { sendRequest('start'); return false; });
+        $('#restart').click(() => { sendRequest('restart'); return false; });
+        $('#stop').click(() => { sendRequest('stop'); return false; });
+    });
+
+    function sendRequest(action) {
+        $.post("/botcp", { action: action }, data => {
+            if (data.error != null) {
+                $('#status').text('ошибка при выполнении действия: ' + data.error);
+            } else {
+                $('#status').text(data.status);
+            }
+        }, "json")
+    }
+</script>
+
 </body>
 </html>

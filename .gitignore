@@ -9,3 +9,9 @@ views/basic-login.html
 static/favicon.ico
 static/css/sot.css
 *.log
+/static/js/
+.idea/dataSources.local.xml
+.idea/dataSources.xml
+.idea/discord.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/sqldialects.xml
