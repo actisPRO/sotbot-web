@@ -1,8 +1,8 @@
 package lib
 
 type LoginData struct {
-	Status 	bool
-	OAuth 	string
+	Status bool
+	OAuth  string
 }
 
 type ErrorData struct {
@@ -10,10 +10,11 @@ type ErrorData struct {
 }
 
 type RedirectData struct {
-	RedirectURL	string
+	RedirectURL string
 }
 
 type IndexData struct {
-	Username	string
-	Xbox		string
+	Username    string
+	AccessLevel int
+	Xbox        string
 }

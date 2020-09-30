@@ -28,9 +28,13 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	member, _ := discord.GuildMember(config.Guild, user.UserID)
+	accessLevel := lib.GetAccessLevelFromRoles(member, config)
+
 	err = indexTmpl.Execute(w, lib.IndexData{
-		Username: user.Username,
-		Xbox: user.Xbox,
+		Username:    user.Username,
+		AccessLevel: accessLevel,
+		Xbox:        user.Xbox,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), 500)
@@ -86,12 +90,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		// Обмен кода на токены авторизации и обновления
 		// Подробнее: https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-redirect-url-example
 		resp, err := http.PostForm("https://discord.com/api/oauth2/token", url.Values{
-			"client_id": {config.ClientId},
+			"client_id":     {config.ClientId},
 			"client_secret": {config.ClientSecret},
-			"grant_type": {"authorization_code"},
-			"code": {q.Get("code")},
-			"redirect_uri": {config.ServerAddress + "login"},
-			"scope": {"identify connections"},
+			"grant_type":    {"authorization_code"},
+			"code":          {q.Get("code")},
+			"redirect_uri":  {config.ServerAddress + "login"},
+			"scope":         {"identify connections"},
 		})
 		if err != nil {
 			err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при обмене токена. " + err.Error()})
@@ -101,9 +105,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var res map[string] interface {}
+		var res map[string]interface{}
 		err = json.NewDecoder(resp.Body).Decode(&res)
-		if err != nil  {
+		if err != nil {
 			err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при парсинге JSON. " + err.Error()})
 			if err != nil {
 				http.Error(w, err.Error(), 500)
