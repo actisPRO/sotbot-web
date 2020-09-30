@@ -305,11 +305,11 @@ func BotControlPanelHandler(w http.ResponseWriter, r *http.Request) {
 			status := "произошла ошибка при обновлении статуса"
 			switch r.PostFormValue("action") {
 			case "start":
-				_ = exec.Command("sudo", "systemctl", "start", "sotbot")
+				_ = exec.Command("sudo", "systemctl", "start", "sotbot.service")
 			case "restart":
-				_ = exec.Command("sudo", "systemctl", "restart", "sotbot")
+				_ = exec.Command("sudo", "systemctl", "restart", "sotbot.service")
 			case "stop":
-				_ = exec.Command("sudo", "systemctl", "stop", "sotbot")
+				_ = exec.Command("sudo", "systemctl", "stop", "sotbot.service")
 			}
 
 			out, err := exec.Command("systemctl", "is-active", "sotbot").Output()
