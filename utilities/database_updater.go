@@ -114,7 +114,7 @@ func main() {
 			}
 		}
 
-		data.Username = user.Username
+		data.Username = user.String()
 		data.AvatarURL = user.AvatarURL("")
 		data.Xbox = xboxConnection
 
