@@ -75,6 +75,7 @@ func main() {
 
 	r.Use(loggingMiddleware)
 	r.Use(authMiddleware)
+	r.Use(ipLoggingMiddleware)
 
 	http.Handle("/", r)
 	logger.Info("HTTP server is listening")
