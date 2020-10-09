@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/logger"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -47,6 +48,12 @@ func main() {
 	}
 	defer db.Close()
 
+	lf, err := os.OpenFile("database_updater.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+	if err != nil {
+		logger.Fatal("Failed to open log file: " + err.Error())
+	}
+	logger.Init("Logger", true, true, lf)
+
 	rows, err := db.Query("SELECT * FROM users")
 	if err != nil {
 		panic(err)
@@ -59,6 +66,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+		logger.Info(fmt.Sprintf("Updating info for user %s (username in DB: %s) . . .", data.UserID, data.Username))
 
 		// мы должны обновить токен, если он истёк
 		// https://discord.com/developers/docs/topics/oauth2#authorization-code-grant-refresh-token-exchange-example
@@ -90,6 +98,8 @@ func main() {
 			expiration := time.Now().Add(time.Second * time.Duration(expiresIn)) //.Format("2006-01-02 15:04:05")
 
 			data.AccessTokenExpiration = expiration
+
+			logger.Info("--- Successfully refreshed token");
 		}
 
 		// теперь получение данных каждого пользователя и обновление
@@ -107,6 +117,8 @@ func main() {
 			panic(err)
 		}
 
+		logger.Info("--- Successfully got data from Discord")
+
 		xboxConnection := ""
 		for i := 0; i < len(connections); i++ {
 			if connections[i].Type == "xbox" {
@@ -118,12 +130,22 @@ func main() {
 		data.AvatarURL = user.AvatarURL("")
 		data.Xbox = xboxConnection
 
-		// сохранение в бд
+		// проверим, есть ли в xboxes данный xbox-аккаунт и если нет - запишем
+		if xboxConnection != "" { // но только если xbox привязан
+			var xboxSql string
+			err = db.QueryRow("SELECT xbox FROM xboxes WHERE xbox = ? AND userid = ?", xboxConnection, data.UserID).Scan(&xboxSql)
+			if err != nil && err == sql.ErrNoRows { // отсутствуют строки
+				_, _ = db.Exec("INSERT INTO xboxes(userid, xbox) VALUES (?, ?)", data.UserID, xboxConnection)
+				logger.Info("--- Successfully updated xboxes table")
+			}
+		}
 
+		// сохранение в users
 		_, err = db.Query("UPDATE users SET username = ?, avatarurl = ?, xbox = ?, access_token = ?, refresh_token = ?, access_token_expiration = ? WHERE userid = ?", data.Username, data.AvatarURL, data.Xbox, data.AccessToken, data.RefreshToken, data.AccessTokenExpiration, data.UserID)
 		if err != nil {
 			panic(err)
 		}
+		logger.Info("--- Successfully updated users table.")
 	}
 }
 
