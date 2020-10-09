@@ -115,7 +115,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if res["error"] != nil {
-			err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при запросе токена."})
+			err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при запросе токена. " + res["error"].(string)})
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
