@@ -1,5 +1,9 @@
 package lib
 
+import (
+	"time"
+)
+
 type LoginData struct {
 	Status bool
 	OAuth  string
@@ -21,4 +25,19 @@ type IndexData struct {
 
 type BotCPData struct {
 	Status		string
+}
+
+type BlacklistEntry struct {
+	Id					string
+	DiscordId			string
+	DiscordUsername		string
+	Xbox				string
+	Date				time.Time
+	Moderator			string
+	Reason				string
+	Additional			string
+}
+
+type BlacklistData struct {
+	Entries		[]BlacklistEntry
 }
