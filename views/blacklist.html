@@ -51,56 +51,18 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">WPGDAA</th>
-                <th>211585123101966336</th>
-                <th>Vanguaas das das drdFxVanguaas das das drdFxVanguaas das das drdFx</th>
-                <th>VaVanguaas das das drdFxVanguaas das das drdFxnguardasd as das das das das dFx</th>
-                <th>03.11. dasd as das d2020</th>
-                <th>actis#0001 (actis)</th>
-                <th>Не укаas das das dsadзана</th>
-                <th>ОтсуVanguaas das das drdFxVanguaas das das drdFxVanguaas das das drdFxVanguaas das das drdFxтствуютdasd asd asd asdas das</th>
-              </tr>
-              <tr>
-                <th scope="row">WPGDAA</th>
-                <th>211585123101966336</th>
-                <th>VanguardFx</th>
-                <th>VanguardFx</th>
-                <th>03.11.2020</th>
-                <th>actis#0001 (actis)sad asd sad as d</th>
-                <th>Не указана</th>
-                <th>Отсутствуют</th>
-              </tr>
-              <tr>
-                <th scope="row">А</th>
-                <th>211585123101966336</th>
-                <th>VanguardFx</th>
-                <th>VanguardFx</th>
-                <th>03.11.2020</th>
-                <th>actis#0001 (actis)sad asd sad as d</th>
-                <th>Не указана</th>
-                <th>Отсутствуют</th>
-              </tr>
-              <tr>
-                <th scope="row">В</th>
-                <th>211585123101966336</th>
-                <th>VanguardFx</th>
-                <th>VanguardFx</th>
-                <th>03.11.2020</th>
-                <th>actis#0001 (actis)sad asd sad as d</th>
-                <th>Не указана</th>
-                <th>Отсутствуют</th>
-              </tr>
-              <tr>
-                <th scope="row">Б</th>
-                <th>211585123101966336</th>
-                <th>VanguardFx</th>
-                <th>VanguardFx</th>
-                <th>03.11.2020</th>
-                <th>actis#0001 (actis)sad asd sad as d</th>
-                <th>Не указана</th>
-                <th>Отсутствуют</th>
-              </tr>
+              {{range .Entries}}
+                <tr>
+                  <th scope="row">{{ .Id }}</th>
+                  <th>{{ .DiscordId }}</th>
+                  <th>{{ .DiscordUsername.String }}</th>
+                  <th>{{ .Xbox.String }}</th>
+                  <th>{{ .DateString }}</th>
+                  <th>{{ .ModeratorName }}</th>
+                  <th>{{ .Reason }}</th>
+                  <th>{{ .Additional.String }}</th>
+                </tr>
+              {{end}}
             </tbody>
           </table>
       </div>

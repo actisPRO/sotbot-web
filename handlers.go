@@ -333,3 +333,56 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 500)
 	}
 }
+
+func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
+	blacklistTmpl := template.Must(template.ParseFiles("views/blacklist.html"))
+	var blacklistEntries []lib.BlacklistEntry
+
+	rows, err := db.Query("SELECT * FROM blacklist ORDER BY ban_date")
+	if err != nil {
+		errLogger.Error("Error in query 'SELECT * FROM blacklist ORDER BY ban_date': " + err.Error())
+		http.Error(w, "Unable to get rows from the blacklist DB", 500)
+		return
+	}
+	defer rows.Close()
+
+	var moderators = map[string]string {}
+	for rows.Next() {
+		entry := lib.BlacklistEntry{}
+		err = rows.Scan(&entry.Id, &entry.DiscordId, &entry.DiscordUsername, &entry.Xbox, &entry.Date, &entry.Moderator,
+			&entry.Reason, &entry.Additional)
+		if err != nil {
+			errLogger.Error("Error while scanning a blacklist entry: " + err.Error())
+			http.Error(w, "Error while scanning a blacklist entry", 500)
+			return
+		}
+		// discord_id might be 0 (as the bot stores it as ulong), so we should change it to an empty string
+		if entry.DiscordId == "0" {
+			entry.DiscordId = ""
+		}
+		entry.DateString = entry.Date.Format("02.01.2006")
+
+		// check if moderator is in the map, if not - get his name
+		_, mKnown := moderators[entry.Moderator]
+		if !mKnown {
+			mUser, err := discord.User(entry.Moderator)
+			if err != nil {
+				entry.ModeratorName = "ID: " + entry.Moderator
+			} else {
+				entry.ModeratorName = mUser.String()
+				moderators[entry.Moderator] = mUser.String()
+			}
+		} else {
+			entry.ModeratorName = moderators[entry.Moderator]
+		}
+
+
+		blacklistEntries = append(blacklistEntries, entry)
+	}
+
+	err = blacklistTmpl.Execute(w, lib.BlacklistData{Entries: blacklistEntries})
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+}

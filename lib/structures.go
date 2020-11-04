@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -30,12 +31,14 @@ type BotCPData struct {
 type BlacklistEntry struct {
 	Id					string
 	DiscordId			string
-	DiscordUsername		string
-	Xbox				string
+	DiscordUsername		sql.NullString
+	Xbox				sql.NullString
 	Date				time.Time
+	DateString			string
 	Moderator			string
+	ModeratorName		string
 	Reason				string
-	Additional			string
+	Additional			sql.NullString
 }
 
 type BlacklistData struct {
