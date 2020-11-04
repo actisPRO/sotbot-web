@@ -61,7 +61,11 @@
                   <th>{{ .DateString }}</th>
                   <th>{{ .ModeratorName }}</th>
                   <th>{{ .Reason }}</th>
-                  <th>{{ .Additional.String }}</th>
+                  <th>
+                    {{if not (eq .AdditionalName "null")}}
+                      <a href="{{.Additional.String}}">{{.AdditionalName}}</a>
+                    {{end}}
+                  </th>
                 </tr>
               {{end}}
             </tbody>

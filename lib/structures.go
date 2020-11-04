@@ -39,6 +39,7 @@ type BlacklistEntry struct {
 	ModeratorName		string
 	Reason				string
 	Additional			sql.NullString
+	AdditionalName		string
 }
 
 type BlacklistData struct {

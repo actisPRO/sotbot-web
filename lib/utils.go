@@ -36,3 +36,16 @@ func GetIP(r *http.Request) (string, error) {
 	}
 	return "", fmt.Errorf("No valid ip found")
 }
+
+// weird way to do that but who cares
+func GetWebsiteName(url string) string {
+	if strings.Contains(url, "imgur.com") {
+		return "Imgur"
+	} else if strings.Contains(url, "youtube.com") {
+		return "YouTube"
+	} else if strings.Contains(url, "cdn.discordapp.com") {
+		return "Discord CDN"
+	} else {
+		return "Сторонний сайт"
+	}
+}

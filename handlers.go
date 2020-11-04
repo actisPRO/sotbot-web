@@ -361,6 +361,10 @@ func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
 			entry.DiscordId = ""
 		}
 		entry.DateString = entry.Date.Format("02.01.2006")
+		entry.AdditionalName = "null"
+		if entry.Additional.String != "" {
+			entry.AdditionalName = lib.GetWebsiteName(entry.Additional.String)
+		}
 
 		// check if moderator is in the map, if not - get his name
 		_, mKnown := moderators[entry.Moderator]
@@ -375,7 +379,6 @@ func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			entry.ModeratorName = moderators[entry.Moderator]
 		}
-
 
 		blacklistEntries = append(blacklistEntries, entry)
 	}
