@@ -21,6 +21,9 @@ var (
 )
 
 const logPath = "app.log"
+const errLog = "error.log"
+
+var errLogger *logger.Logger
 
 func main() {
 	var err error
@@ -29,8 +32,15 @@ func main() {
 	lf, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
 	if err != nil {
 		logger.Fatal("Failed to open log file: " + err.Error())
+		return
+	}
+	ef, err := os.OpenFile(errLog, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0660)
+	if err != nil {
+		logger.Fatal("Failed to open log file: " + err.Error())
+		return
 	}
 	logger.Init("Logger", true, true, lf)
+	errLogger = logger.Init("Errors", true, true, ef)
 
 	// Loading configuration
 	config, err = lib.ReadConfig()
@@ -68,6 +78,7 @@ func main() {
 	r.HandleFunc("/login", LoginHandler)
 	r.HandleFunc("/xbox", XboxHandler)
 	r.HandleFunc("/logout", LogoutHandler)
+	r.HandleFunc("/blacklist", BlacklistHandler)
 	//r.HandleFunc("/botcp", BotControlPanelHandler)
 
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
