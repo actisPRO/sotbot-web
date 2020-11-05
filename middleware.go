@@ -13,6 +13,7 @@ import (
 
 var noAuthPages = []string {
 	"login",
+	"blacklist",
 	"static",
 }
 
