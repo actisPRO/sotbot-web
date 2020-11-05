@@ -2,10 +2,13 @@ package lib
 
 import (
 	"fmt"
+	"math/rand"
 	"net"
 	"net/http"
 	"strings"
 )
+
+const letterBytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 func GetIP(r *http.Request) (string, error) {
 	//Get IP from CF-Connecting-IP (because we are using Cloudflare)
@@ -48,4 +51,12 @@ func GetWebsiteName(url string) string {
 	} else {
 		return "Сторонний сайт"
 	}
+}
+
+func RandomString(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
 }

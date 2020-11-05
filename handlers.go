@@ -396,7 +396,7 @@ func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// only one param
+// use only one param, the second must be ""
 func IsBlacklisted(userid string, xbox string) bool {
 	var id string
 	var query string
@@ -417,5 +417,69 @@ func IsBlacklisted(userid string, xbox string) bool {
 			errLogger.Error(fmt.Sprintf("SQL error (query: %s): %s", query, err.Error()))
 		}
 		return false
+	}
+}
+
+/*
+	Checks if user is trying to bypass the blacklist using a twink account.
+	If true blocks user
+*/
+func IsTryingToBypassBlacklist(userid string, xbox string, ip string) (bool, error) {
+	var err error
+	if IsBlacklisted(userid, "") {
+		// User ID is already is in the blacklist, but his Xbox is new
+		if !IsBlacklisted("", xbox) {
+			err = AddToBlacklist(userid, xbox)
+			if err != nil {
+				return true, err
+			}
+			return true, nil
+		}
+		return false, nil
+	}
+
+	if IsBlacklisted("", xbox) {
+		// Xbox is already in the blacklist, but user ID is new.
+		if !IsBlacklisted(userid, "") {
+			err = AddToBlacklist(userid, xbox)
+			if err != nil {
+				return true, err
+			}
+			return true, nil
+		}
+		return false, nil
+	}
+
+	var id string
+	err = db.QueryRow("SELECT id FROM blacklist WHERE discord_id = (SELECT userid FROM ips WHERE ip = ?)", ip).Scan(&id)
+	if err == nil {
+		//new user id and xbox, but an old ip
+		err = AddToBlacklist(userid, xbox)
+		if err != nil {
+			return true, err
+		}
+		return true, nil
+	} else {
+		if err != sql.ErrNoRows {
+			return true, err
+		}
+		return false, nil
+	}
+}
+
+func AddToBlacklist(userid string, xbox string) error {
+	user, err := discord.User(userid)
+	if err != nil {
+		return err
+	}
+	bot, err := discord.User("@me")
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("INSERT INTO blacklist(id, discord_id, discord_username, xbox, ban_date, moderator_id, reason) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		lib.RandomString(6), userid, user.String(), xbox, time.Now().Format("2006-01-02"), bot.ID, "Автоматическая блокировка системой защиты")
+	if err != nil {
+		return err
 	}
 }
