@@ -2,6 +2,7 @@ package main
 
 import (
 	"./lib"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -387,5 +388,26 @@ func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
+	}
+}
+
+// only one param
+func IsBlacklisted(userid string, xbox string) bool {
+	var id string
+	var query string
+	if userid != "" {
+		query = "SELECT id FROM blacklist WHERE discord_id = ?"
+	} else if xbox != "" {
+		query = "SELECT xbox FROM blacklist WHERE xbox = ?"
+	}
+
+	err := db.QueryRow(query, userid).Scan(&id)
+	if err == nil {
+		return true
+	} else {
+		if err != sql.ErrNoRows {
+			errLogger.Error(fmt.Sprintf("SQL error (query: %s): %s", query, err.Error()))
+		}
+		return false
 	}
 }
