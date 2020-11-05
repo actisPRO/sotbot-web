@@ -200,6 +200,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
+
+			_, err = IsTryingToBypassBlacklist(dUser.ID, xboxConnection, ip)
+			if err != nil {
+				errLogger.Error("Error during IsTryingToBypassBlacklist procedure: " + err.Error())
+			}
 		} else {
 			_, _ = db.Exec(fmt.Sprintf("UPDATE users SET ip = '%s', last_login = '%s', access_token = '%s', refresh_token = '%s', access_token_expiration = '%s' WHERE userid = '%s'", ip, regDate, accessToken, refreshToken, expiration, dUser.ID))
 		}
@@ -407,6 +412,8 @@ func IsBlacklisted(userid string, xbox string) bool {
 	} else if xbox != "" {
 		query = "SELECT id FROM blacklist WHERE xbox = ?"
 		param = xbox
+	} else {
+		return false
 	}
 
 	err := db.QueryRow(query, param).Scan(&id)
@@ -428,7 +435,7 @@ func IsTryingToBypassBlacklist(userid string, xbox string, ip string) (bool, err
 	var err error
 	if IsBlacklisted(userid, "") {
 		// User ID is already is in the blacklist, but his Xbox is new
-		if !IsBlacklisted("", xbox) {
+		if !IsBlacklisted("", xbox) && xbox != "" {
 			err = AddToBlacklist(userid, xbox)
 			if err != nil {
 				return true, err
@@ -482,4 +489,6 @@ func AddToBlacklist(userid string, xbox string) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
 }
