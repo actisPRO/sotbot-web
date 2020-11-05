@@ -22,6 +22,7 @@ type IndexData struct {
 	Username    string
 	AccessLevel int
 	Xbox        string
+	Blacklisted bool
 }
 
 type BotCPData struct {

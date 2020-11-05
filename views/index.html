@@ -35,14 +35,16 @@
         <div class="page-header">
             <div>
                 <h2>Привет, {{ .Username}}!</h2>
+            </div>
+            <div>
+                {{if .Blacklisted}}
+                    <p class="text-danger">Ты находишься в чёрном списке рейдов!</p>
+                {{end}}
+
                 {{if eq .Xbox ""}}
                     <p><strong>Xbox:</strong> не привязан, <strong><a href="/xbox">привяжи его</a></strong> для доступа к рейдам</p>
                 {{else}}
                     <p><strong>Xbox:</strong> {{ .Xbox}}</p>
-                {{end}}
-
-                {{if ge .AccessLevel 3}}
-                <!--<a class="link button" href="/botcp">Управление ботом</a> -->
                 {{end}}
             </div>
             <div>

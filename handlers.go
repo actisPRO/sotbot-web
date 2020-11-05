@@ -32,11 +32,16 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	member, _ := discord.GuildMember(config.Guild, user.UserID)
 	accessLevel := lib.GetAccessLevelFromRoles(member, config)
+	blacklisted := false
+	if IsBlacklisted(user.UserID, "") || IsBlacklisted("", user.Xbox) {
+		blacklisted = true
+	}
 
 	err = indexTmpl.Execute(w, lib.IndexData{
 		Username:    user.Username,
 		AccessLevel: accessLevel,
 		Xbox:        user.Xbox,
+		Blacklisted: blacklisted,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), 500)
@@ -395,13 +400,16 @@ func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
 func IsBlacklisted(userid string, xbox string) bool {
 	var id string
 	var query string
+	var param string
 	if userid != "" {
 		query = "SELECT id FROM blacklist WHERE discord_id = ?"
+		param = userid
 	} else if xbox != "" {
-		query = "SELECT xbox FROM blacklist WHERE xbox = ?"
+		query = "SELECT id FROM blacklist WHERE xbox = ?"
+		param = xbox
 	}
 
-	err := db.QueryRow(query, userid).Scan(&id)
+	err := db.QueryRow(query, param).Scan(&id)
 	if err == nil {
 		return true
 	} else {
