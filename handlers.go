@@ -192,7 +192,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if dbData.UserID == "" { // не зарегистрирован
-			_, err = db.Exec(fmt.Sprintf("INSERT INTO users(userid, registered_on, last_login, username, avatarurl, xbox, ip, access_token, refresh_token, access_token_expiration) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", dUser.ID, regDate, regDate, dUser.String(), dUser.AvatarURL(""), xboxConnection, ip, accessToken, refreshToken, expiration))
+			_, err = db.Exec("INSERT INTO users(userid, registered_on, last_login, username, avatarurl, xbox, ip, access_token, refresh_token, access_token_expiration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				dUser.ID, regDate, regDate, dUser.String(), dUser.AvatarURL(""), xboxConnection, ip, accessToken, refreshToken, expiration)
 			if err != nil {
 				err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
 				if err != nil {
@@ -206,7 +207,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				errLogger.Error("Error during IsTryingToBypassBlacklist procedure: " + err.Error())
 			}
 		} else {
-			_, _ = db.Exec(fmt.Sprintf("UPDATE users SET ip = '%s', last_login = '%s', access_token = '%s', refresh_token = '%s', access_token_expiration = '%s' WHERE userid = '%s'", ip, regDate, accessToken, refreshToken, expiration, dUser.ID))
+			_, _ = db.Exec("UPDATE users SET ip = ?, last_login = ?, access_token = ?, refresh_token = ?, access_token_expiration = ? WHERE userid = ?",
+				ip, regDate, accessToken, refreshToken, expiration, dUser.ID)
 		}
 
 		session.Values["auth"] = true
@@ -220,7 +222,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Привязка Xbox (доступна, если при регистрации не был привязан Xbox)
+// Getting Xbox connection from user's account
 func XboxHandler(w http.ResponseWriter, r *http.Request) {
 	errorTmpl := template.Must(template.ParseFiles("views/error.html"))
 	redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
