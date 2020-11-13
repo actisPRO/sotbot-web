@@ -228,7 +228,7 @@ func XboxHandler(w http.ResponseWriter, r *http.Request) {
 	redirectTmpl := template.Must(template.ParseFiles("views/redirect.html"))
 
 	session, _ := store.Get(r, "sotweb")
-	token, err := lib.GetTokenFromSession(db, session)
+	webUser, err := lib.GetUserDataFromDB(db, session.Values["userid"].(string))
 	if err != nil {
 		err := errorTmpl.Execute(w, lib.ErrorData{Message: "Ошибка при отправке запроса к БД. " + err.Error()})
 		if err != nil {
@@ -237,6 +237,7 @@ func XboxHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+	token := webUser.AccessToken
 
 	user, err := lib.GetUserDataFromDiscord(token)
 	if err != nil {
@@ -359,7 +360,7 @@ func BlacklistHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var moderators = map[string]string {}
+	var moderators = map[string]string{}
 	for rows.Next() {
 		entry := lib.BlacklistEntry{}
 		err = rows.Scan(&entry.Id, &entry.DiscordId, &entry.DiscordUsername, &entry.Xbox, &entry.Date, &entry.Moderator,
